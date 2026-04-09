@@ -38,3 +38,6 @@ while True:
         time.sleep(sleep_time)
     if GPIO.input(up) & GPIO.input(down) :
         num = 255
+        GPIO.output(leds, dec2bin(num))
+        print(num, dec2bin(num))
+        time.sleep(sleep_time)

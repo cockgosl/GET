@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 
+
 class PWM_DAC:
     def __init__(self, gpio_pin, pwm_frequency, dynamic_range, verbose=False):
         self.gpio_pin = gpio_pin
@@ -19,24 +20,24 @@ class PWM_DAC:
         GPIO.cleanup()
 
     def set_voltage(self, voltage):
-        if not(0.0 <= voltage <= self.dynamic_range):
-            print(f"Напряжение за диапазоном ЦАП(0.0 - {self.dynamic_range:.2f} в)")
-            print("Выставляем 0")
+        if not (0.0 <= voltage <= self.dynamic_range):
+            print(f"Напряжение выходит за динамический диапазон ЦАП (0.00 - {self.dynamic_range:.2f} В)")
+            print("Устанавливаем 0.0 В")
             duty_cycle = 0.0
         else:
             duty_cycle = voltage / self.dynamic_range * 100
 
         self.pwm.ChangeDutyCycle(duty_cycle)
-        
-        
+
         if self.verbose:
-            print(f"Напряжение: {voltage:.3f} В, заполнение ШИМ: {duty_cycle:.2f}%")
+            print(f"Напряжение на выходе ЦАП: {voltage:.3f} В, заполнение ШИМ: {duty_cycle:.2f} %")
 
 
 if __name__ == "__main__":
     dac = None
+
     try:
-        dac = PWM_DAC(12, 500, 3.29, True)
+        dac = PWM_DAC(12, 500, 3.290, True)
 
         while True:
             try:
@@ -44,9 +45,8 @@ if __name__ == "__main__":
                 dac.set_voltage(voltage)
 
             except ValueError:
-                print("вы ввели не число. Попробуйте ещё раз\n")
+                print("Вы ввели не число. Попробуйте ещё раз\n")
 
     finally:
         if dac is not None:
             dac.deinit()
-

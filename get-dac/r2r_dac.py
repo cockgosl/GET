@@ -50,28 +50,3 @@ if __name__ == "__main__":
     finally:
         if dac is not None:
             dac.deinit()
-
-
-
-def voltage_to_number(voltage):
-    
-
-    return int(voltage/dynamic_range * 255)
-
-def number_to_dac(number):
-    bits = [int(bit) for bit in f"{number:08b}"]
-    GPIO.output(dec_bits, bits)
-    print(f"Число на вход ЦАП: {number}, биты:{bits}")
-
-try:
-    while True:
-        try:
-            voltage = float(input("Введите напряжение в Вольтах: "))
-            number = voltage_to_number(voltage)
-            number_to_dac(number)
-        except ValueError:
-            print("вы ввели не число. Попробуйте ещё раз\n")
-
-finally:
-    GPIO.output(dec_bits, 0)
-    GPIO.cleanup()

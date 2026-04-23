@@ -7,5 +7,4 @@ def get_sin_wave_amplitude(freq, current_time):
 
 
 def wait_for_sampling_period(sampling_frequency):
-    sampling_period = 1 / sampling_frequency
-    time.sleep(sampling_period)
+    time.sleep(1 / sampling_frequency)

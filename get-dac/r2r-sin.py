@@ -1,4 +1,4 @@
-import r2r_dac as r2r
+import r2rdac as r2r
 import signal_generator as sg
 import time
 

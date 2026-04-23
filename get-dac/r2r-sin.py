@@ -1,9 +1,9 @@
-import r2rdac as r2r
-import signal_generator as sg
+import math
 import time
+import r2r_dac as r2r
 
 
-amplitude = 3.2
+amplitude = 3.0
 signal_frequency = 10
 sampling_frequency = 1000
 
@@ -14,17 +14,15 @@ if __name__ == "__main__":
     try:
         dac = r2r.R2R_DAC([26, 19, 13, 6, 5, 11, 9, 10], 3.3, verbose=False)
 
-        start_time = time.time()
+        samples_per_period = int(sampling_frequency / signal_frequency)
 
         while True:
-            current_time = time.time() - start_time
+            for n in range(samples_per_period):
+                normalized_amplitude = (math.sin(2 * math.pi * n / samples_per_period) + 1) / 2
+                voltage = normalized_amplitude * amplitude
 
-            normalized_amplitude = sg.get_sin_wave_amplitude(signal_frequency, current_time)
-            voltage = normalized_amplitude * amplitude
-
-            dac.set_voltage(voltage)
-
-            sg.wait_for_sampling_period(sampling_frequency)
+                dac.set_voltage(voltage)
+                time.sleep(1 / sampling_frequency)
 
     except KeyboardInterrupt:
         print("\nГенерация сигнала остановлена пользователем")

@@ -48,10 +48,11 @@ class R2R_ADC:
             guess = result | (1 << bit)
             self.number_to_dac(guess)
             time.sleep(self.compare_time)
-            if GPIO.input(self.comp_gpio) == 1:
+            comp_out = GPIO.input(self.comp_gpio)
+            if comp_out == 0:
                 result = guess
             if self.verbose:
-                print(f"[SAR] Бит {bit}, guess={guess}, result={result}")
+                print(f"[SAR] Бит {bit}, guess={guess}, comp={comp_out}, result={result}")
         return result
 
     def get_sar_voltage(self):

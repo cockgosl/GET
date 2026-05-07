@@ -5,7 +5,7 @@ from mcp3021_driver import MCP3021
 
 
 DYNAMIC_RANGE = 5.0
-DURATION = 3.0
+DURATION = 10.0
 
 
 adc = MCP3021(dynamic_range=DYNAMIC_RANGE)
@@ -56,7 +56,4 @@ try:
     plt.show()
 
 finally:
-    try:
-        adc.deinit()
-    except OSError:
-        pass
+    adc.deinit()

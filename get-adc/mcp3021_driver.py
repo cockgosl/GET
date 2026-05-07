@@ -13,15 +13,16 @@ class MCP3021:
         self.bus.close()
 
     def get_number(self):
-        data = self.bus.read_i2c_block_data(self.address, 0, 2)
+        data = self.bus.read_word_data(self.address, 0)
 
-        upper_data_byte = data[0]
-        lower_data_byte = data[1]
+        lower_data_byte = data >> 8
+        upper_data_byte = data & 0xFF
 
-        number = ((upper_data_byte << 8) | lower_data_byte) >> 2
+        number = (upper_data_byte << 6) | (lower_data_byte >> 2)
 
         if self.verbose:
             print(
+                f"Принятые данные: {data}, "
                 f"Старший байт: {upper_data_byte:x}, "
                 f"Младший байт: {lower_data_byte:x}, "
                 f"Число: {number}"
@@ -31,8 +32,7 @@ class MCP3021:
 
     def get_voltage(self):
         number = self.get_number()
-        voltage = (number / 1023.0) * self.dynamic_range
-        return voltage
+        return (number / 1023.0) * self.dynamic_range
 
 
 if __name__ == "__main__":

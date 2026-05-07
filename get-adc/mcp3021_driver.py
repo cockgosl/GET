@@ -3,36 +3,43 @@ import time
 
 
 class MCP3021:
-    def __init__(self, dynamic_range, verbose=False):
+    def __init__(self, dynamic_range, address=0x4D, verbose=False):
         self.bus = smbus.SMBus(1)
         self.dynamic_range = dynamic_range
-        self.address = 0x4D
+        self.address = address
         self.verbose = verbose
 
     def deinit(self):
-        self.bus.close()
+        try:
+            self.bus.close()
+        except OSError:
+            pass
 
     def get_number(self):
-        data = self.bus.read_word_data(self.address, 0)
+        try:
+            upper_data_byte = self.bus.read_byte(self.address)
+            lower_data_byte = self.bus.read_byte(self.address)
 
-        lower_data_byte = data >> 8
-        upper_data_byte = data & 0xFF
+            number = ((upper_data_byte << 8) | lower_data_byte) >> 2
+            number = number & 0x3FF
 
-        number = (upper_data_byte << 6) | (lower_data_byte >> 2)
+            if self.verbose:
+                print(
+                    f"Старший байт: {upper_data_byte:02x}, "
+                    f"Младший байт: {lower_data_byte:02x}, "
+                    f"Число: {number}"
+                )
 
-        if self.verbose:
-            print(
-                f"data={data}, "
-                f"upper={upper_data_byte:x}, "
-                f"lower={lower_data_byte:x}, "
-                f"number={number}"
-            )
+            return number
 
-        return number
+        except OSError as error:
+            print(f"Ошибка I2C: {error}")
+            return 0
 
     def get_voltage(self):
         number = self.get_number()
-        return (number / 1023.0) * self.dynamic_range
+        voltage = (number / 1023.0) * self.dynamic_range
+        return voltage
 
 
 if __name__ == "__main__":

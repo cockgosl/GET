@@ -15,18 +15,16 @@ class R2R_ADC:
         GPIO.setup(self.bits_gpio, GPIO.OUT, initial=0)
         GPIO.setup(self.comp_gpio, GPIO.IN)
 
-    def __del__(self):
-        try:
-            GPIO.output(self.bits_gpio, 0)
-        except:
-            pass
-        finally:
-            GPIO.cleanup()
+    def deinit(self):
+        GPIO.output(self.bits_gpio, 0)
+        GPIO.cleanup()
 
     def number_to_dac(self, number):
         bits = [(number >> i) & 1 for i in range(7, -1, -1)]
+
         for pin, bit in zip(self.bits_gpio, bits):
             GPIO.output(pin, bit)
+
         if self.verbose:
             print(f"[DAC] {number} -> {bits}")
 
@@ -34,8 +32,12 @@ class R2R_ADC:
         for number in range(256):
             self.number_to_dac(number)
             time.sleep(self.compare_time)
+
             if GPIO.input(self.comp_gpio) == 1:
+                self.number_to_dac(0)
                 return number
+
+        self.number_to_dac(0)
         return 255
 
     def get_sc_voltage(self):
@@ -44,15 +46,25 @@ class R2R_ADC:
 
     def successive_approximation_adc(self):
         result = 0
+
         for bit in range(7, -1, -1):
             guess = result | (1 << bit)
             self.number_to_dac(guess)
             time.sleep(self.compare_time)
+
             comp_out = GPIO.input(self.comp_gpio)
+
             if comp_out == 0:
                 result = guess
+
             if self.verbose:
-                print(f"[SAR] Бит {bit}, guess={guess}, comp={comp_out}, result={result}")
+                print(
+                    f"[SAR] Бит {bit}, "
+                    f"guess={guess}, "
+                    f"comp={comp_out}, "
+                    f"result={result}"
+                )
+
         return result
 
     def get_sar_voltage(self):
@@ -61,11 +73,13 @@ class R2R_ADC:
 
 
 if __name__ == "__main__":
+    adc = R2R_ADC(dynamic_range=3.3, compare_time=0.01)
+
     try:
-        adc = R2R_ADC(dynamic_range=3.3)
         while True:
-            voltage = adc.get_sar_voltage()
-            print(f"Напряжение: {voltage:.3f} В")
-            time.sleep(0.5)
+            code = adc.sequential_counting_adc()
+            voltage = (code / 255.0) * adc.dynamic_range
+            print(f"Код: {code:3d}, Напряжение: {voltage:.3f} В")
+
     finally:
-        del adc
+        adc.deinit()

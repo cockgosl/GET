@@ -51,13 +51,41 @@ class R2R_ADC:
         voltage = (code / 255.0) * self.dynamic_range
         return voltage
 
+    def successive_approximation_adc(self):
+        result = 0
+
+        for bit in range(7, -1, -1):
+            test_number = result | (1 << bit)
+
+            self.number_to_dac(test_number)
+            time.sleep(self.compare_time)
+
+            if GPIO.input(self.comp_gpio) == 0:
+                result = test_number
+
+            if self.verbose:
+                print(
+                    f"[SAR] bit={bit}, "
+                    f"test={test_number}, "
+                    f"result={result}, "
+                    f"comp={GPIO.input(self.comp_gpio)}"
+                )
+
+        self.number_to_dac(0)
+        return result
+
+    def get_sar_voltage(self):
+        code = self.successive_approximation_adc()
+        voltage = (code / 255.0) * self.dynamic_range
+        return voltage
+
 
 if __name__ == "__main__":
     adc = R2R_ADC(dynamic_range=3.3, compare_time=0.001)
 
     try:
         while True:
-            voltage = adc.get_sc_voltage()
+            voltage = adc.get_sar_voltage()
             print(f"Напряжение: {voltage:.3f} В")
 
     finally:

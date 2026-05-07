@@ -22,10 +22,10 @@ class MCP3021:
 
         if self.verbose:
             print(
-                f"Принятые данные: {data}, "
-                f"Старший байт: {upper_data_byte:x}, "
-                f"Младший байт: {lower_data_byte:x}, "
-                f"Число: {number}"
+                f"data={data}, "
+                f"upper={upper_data_byte:x}, "
+                f"lower={lower_data_byte:x}, "
+                f"number={number}"
             )
 
         return number

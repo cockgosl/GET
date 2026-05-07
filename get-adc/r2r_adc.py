@@ -38,21 +38,18 @@ class R2R_ADC:
             time.sleep(self.compare_time)
 
             if GPIO.input(self.comp_gpio) == 1:
-                # Оставляем верхнюю точку пилы на экране чуть дольше
                 time.sleep(self.compare_time * 5)
-
-                # Сбрасываем ЦАП в 0, чтобы начался новый зуб пилы
                 self.number_to_dac(0)
                 time.sleep(self.compare_time * 2)
-
                 return number
 
         self.number_to_dac(0)
         return 255
 
     def get_sc_voltage(self):
-        number = self.sequential_counting_adc()
-        return (number / 255.0) * self.dynamic_range
+        code = self.sequential_counting_adc()
+        voltage = (code / 255.0) * self.dynamic_range
+        return voltage
 
 
 if __name__ == "__main__":
@@ -60,7 +57,8 @@ if __name__ == "__main__":
 
     try:
         while True:
-            adc.sequential_counting_adc()
+            voltage = adc.get_sc_voltage()
+            print(f"Напряжение: {voltage:.3f} В")
 
     finally:
         adc.deinit()

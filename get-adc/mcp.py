@@ -56,4 +56,7 @@ try:
     plt.show()
 
 finally:
-    adc.deinit()
+    try:
+        adc.deinit()
+    except OSError:
+        pass
